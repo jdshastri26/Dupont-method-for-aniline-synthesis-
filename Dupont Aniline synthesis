@@ -1,0 +1,66 @@
+# Load necessary library
+library(deSolve)
+library(ggplot2)
+
+# Define initial concentrations (in mol/L)
+initial_concentrations <- c(Nitrobenzene = 1.0,  # initial concentration of Nitrobenzene
+                            Hydrogen = 2.0,     # initial concentration of Hydrogen
+                            Aniline = 0.0,      # initial concentration of Aniline
+                            Water = 0.0)        # initial concentration of Water
+
+# Define rate constants (in 1/s, hypothetical values for simulation)
+rate_constant <- 0.1
+
+# Define the rate equations for the reaction
+rate_equations <- function(time, concentrations, parameters) {
+  with(as.list(c(concentrations, parameters)), {
+    # Rate of reaction (assuming first-order reaction for simplification)
+    rate <- rate_constant * Nitrobenzene * Hydrogen
+    
+    # Rate of change of concentrations
+    dNitrobenzene <- -rate
+    dHydrogen <- -3 * rate  # Based on the stoichiometry of the reaction
+    dAniline <- rate
+    dWater <- 2 * rate
+    
+    list(c(dNitrobenzene, dHydrogen, dAniline, dWater))
+  })
+}
+
+# Define parameters
+parameters <- c(rate_constant = rate_constant)
+
+# Define time sequence for the simulation (in seconds)
+time_sequence <- seq(0, 100, by = 1)
+
+# Solve the differential equations
+results <- ode(y = initial_concentrations, times = time_sequence, func = rate_equations, parms = parameters)
+
+# Convert results to a data frame for plotting
+results_df <- as.data.frame(results)
+
+# Plot the results
+ggplot(data = results_df, aes(x = time)) +
+  geom_line(aes(y = Nitrobenzene, color = "Nitrobenzene")) +
+  geom_line(aes(y = Hydrogen, color = "Hydrogen")) +
+  geom_line(aes(y = Aniline, color = "Aniline")) +
+  geom_line(aes(y = Water, color = "Water")) +
+  labs(title = "Concentration of Reactants and Products Over Time",
+       x = "Time (s)", y = "Concentration (mol/L)") +
+  scale_color_manual(values = c("Nitrobenzene" = "blue", "Hydrogen" = "green", "Aniline" = "red", "Water" = "purple")) +
+  theme_minimal()
+
+
+
+
+Explanation
+
+    Load the deSolve and ggplot2 libraries: These libraries are used for solving differential equations and plotting the results, respectively.
+    Define initial concentrations: Starting concentrations for nitrobenzene, hydrogen, aniline, and water.
+    Define rate constants: Hypothetical rate constant for the reaction.
+    Rate equations: Differential equations describing the reaction kinetics, assuming a first-order reaction for simplification.
+    Parameters: A list containing the rate constants.
+    Time sequence: Time points at which to solve the differential equations.
+    Solve ODEs: Using ode function from deSolve to solve the equations.
+    Plot the results: Using ggplot2 to visualize the concentrations of reactants and products over time.
+
